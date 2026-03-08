@@ -32,6 +32,19 @@ typedef struct Node {
     struct Node *next;
 } Node;
 
+// Queue node
+typedef struct QNode {
+    char message[200];
+    struct QNode *next;
+} QNode;
+
+// Queue struct
+typedef struct {
+    QNode *front;
+    QNode *back;
+    int size;
+} Queue;
+
 // Move, Power, Type, Accuracy. These go first since pokemon struct requires them
 Moves pikachu_moves[4] = {
     {"Thundershock", 40, "electric", 100},
@@ -135,99 +148,24 @@ pokemon psyduck = {
     .moves = psyduck_moves,
     .weaknesses = {"electric", "grass", ""}
 };
-
+// ====================
 // Hash table functions
+// ====================
+int hash(string name);
+void add_pokemon(Node *pokedex[], pokemon *poke);// add pokemon to hash table
+pokemon* search_pokemon(Node *pokedex[], string name);// search for pokemon by name, returns NULL pointer if not found
+void remove_pokemon(Node *pokedex[], string name);
 
-int hash(string name)
-{
-    int sum = 0;
-    for (int i = 0; i < strlen(name); i++)
-    {
-        sum += tolower(name[i]);
-    }
-    return sum % TABLE_SIZE;
-}
+// ===============
+// Queue functions
+// ===============
+void enqueue(Queue *q, string message);
+void dequeue(Queue *q);
+void print_battle_log(Queue *q);
 
-// add pokemon to hash table
-void add_pokemon(Node *pokedex[], pokemon *poke)
-{
-    int index = hash(poke->name);
-
-    Node *new_node = malloc(sizeof(Node));
-    new_node->poke = poke;
-
-    //insertar al frente de la lista
-    new_node->next = pokedex[index];
-    pokedex[index] = new_node;
-
-    printf("Added %s to the Pokedex!\n", poke->name);
-}
-
-// search for pokemon by name, returns NULL pointer if not found
-pokemon* search_pokemon(Node *pokedex[], string name)
-{
-    int index = hash(name);
-
-    Node *cursor = pokedex[index];
-
-    while (cursor != NULL)
-    {
-        char cursor_name[100];
-        char search_name[100];
-
-        strcpy(cursor_name, cursor->poke->name);
-        strcpy(search_name, name);
-
-        for (int i = 0; i < strlen(cursor_name); i++)
-            cursor_name[i] = tolower(cursor_name[i]);
-        for (int i = 0; i < strlen(search_name); i++)
-            search_name[i] = tolower(search_name[i]);
-
-        if (strcmp(cursor_name, search_name) == 0)
-        {
-            printf("%s found in the Pokedex!\n", cursor->poke->name);
-            return cursor->poke;
-        }
-        cursor = cursor->next;
-    }
-
-    printf("%s not found in the Pokedex!\n", name);
-    return NULL;
-
-}
-
-void remove_pokemon(Node *pokedex[], string name)
-{
-    int index = hash(name);
-
-    Node *cursor = pokedex[index];
-    Node *prev = NULL;
-
-    while (cursor != NULL)
-    {
-        char cursor_name[100];
-        char search_name[100];
-
-        strcpy(cursor_name, cursor->poke->name);
-        strcpy(search_name, name);
-
-        for (int i = 0; i < strlen(cursor_name); i++)
-            cursor_name[i] = tolower(cursor_name[i]);
-        for (int i = 0; i < strlen(search_name); i++)
-            search_name[i] = tolower(search_name[i]);
-
-        if (strcmp(cursor_name, search_name) == 0)
-        {
-            if (prev == NULL)
-                pokedex[index] = cursor->next;
-            else
-                prev->next = cursor->next;
-        }
-    } 
-    printf("%s not found in the Pokedex!\n", name);
-}
-
+// ==============
 // Game functions
+// ==============
 void get_user_input(string* cpu_name);
 int display_options();
 int pokemon_selection();
@@ -237,6 +175,7 @@ int show_moves(pokemon* current_pokemon);
 int super_effective(string move_type, pokemon* opponent);
 int is_name_valid(string name);
 int validate_selection(int min, int max, string prompt);
+
 
 int main()
 {
@@ -571,3 +510,144 @@ int super_effective(string move_type, pokemon* opponent)
     }
     return 0;
 }
+
+int hash(string name)
+{
+    int sum = 0;
+    for (int i = 0; i < strlen(name); i++)
+    {
+        sum += tolower(name[i]);
+    }
+    return sum % TABLE_SIZE;
+}
+
+// add pokemon to hash table
+void add_pokemon(Node *pokedex[], pokemon *poke)
+{
+    int index = hash(poke->name);
+
+    Node *new_node = malloc(sizeof(Node));
+    new_node->poke = poke;
+
+    //insertar al frente de la lista
+    new_node->next = pokedex[index];
+    pokedex[index] = new_node;
+
+    printf("Added %s to the Pokedex!\n", poke->name);
+}
+
+// search for pokemon by name, returns NULL pointer if not found
+pokemon* search_pokemon(Node *pokedex[], string name)
+{
+    int index = hash(name);
+
+    Node *cursor = pokedex[index];
+
+    while (cursor != NULL)
+    {
+        char cursor_name[100];
+        char search_name[100];
+
+        strcpy(cursor_name, cursor->poke->name);
+        strcpy(search_name, name);
+
+        for (int i = 0; i < strlen(cursor_name); i++)
+            cursor_name[i] = tolower(cursor_name[i]);
+        for (int i = 0; i < strlen(search_name); i++)
+            search_name[i] = tolower(search_name[i]);
+
+        if (strcmp(cursor_name, search_name) == 0)
+        {
+            printf("%s found in the Pokedex!\n", cursor->poke->name);
+            return cursor->poke;
+        }
+        cursor = cursor->next;
+    }
+
+    printf("%s not found in the Pokedex!\n", name);
+    return NULL;
+
+}
+
+void remove_pokemon(Node *pokedex[], string name)
+{
+    int index = hash(name);
+
+    Node *cursor = pokedex[index];
+    Node *prev = NULL;
+
+    while (cursor != NULL)
+    {
+        char cursor_name[100];
+        char search_name[100];
+
+        strcpy(cursor_name, cursor->poke->name);
+        strcpy(search_name, name);
+
+        for (int i = 0; i < strlen(cursor_name); i++)
+            cursor_name[i] = tolower(cursor_name[i]);
+        for (int i = 0; i < strlen(search_name); i++)
+            search_name[i] = tolower(search_name[i]);
+
+        if (strcmp(cursor_name, search_name) == 0)
+        {
+            if (prev == NULL)
+                pokedex[index] = cursor->next;
+            else
+                prev->next = cursor->next;
+        }
+    } 
+    printf("%s not found in the Pokedex!\n", name);
+}
+
+void enqueue(Queue *q, string message)
+{
+    QNode *new_node = malloc(sizeof(QNode));
+    strcpy(new_node->message, message);
+    new_node->next = NULL;
+
+    if (q->back == NULL) // queue is empty
+    {
+        q->front = new_node;
+        q->back = new_node;
+    }
+    else
+    {
+        q->back->next = new_node;
+        q->back = new_node;
+    }
+    q->size++;
+}
+
+void dequeue(Queue *q)
+{
+    if (q->front == NULL)
+    {
+        return;
+    }
+
+    QNode *temp = q->front; //keep track of front in temp to free memory after
+    q->front = q->front->next;
+
+    if (q->front == NULL) // queue is empty
+    {
+        q->back = NULL;
+    }
+    free(temp);
+    q->size--;
+}
+
+void print_battle_log(Queue *q)
+{
+    printf("\n=== Battle History ===\n");
+
+    int move_number = 1;
+    while (q->front != NULL)
+    {
+        printf("%i. %s\n", move_number, q->front->message);
+        dequeue(q);
+        move_number++;
+    }
+    printf("=== End of Battle ===\n\n");
+}
+
