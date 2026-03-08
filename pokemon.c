@@ -259,15 +259,19 @@ int main()
         add_pokemon(pokedex, &available_pokemon[i]);
     }
 
+    printf("\n");
+    sleep(3);
+
+    //set up game
+
     // List of possible opponents
     char names[9][10] = {"Ash", "Misty", "Brock", "Erika", "Koga", "Sabrina", "Blaine", "Giovanni","Gary"};
 
     string global_cpu_name = names[(rand() % 9)];
 
-    int choice, cpu_choice, item_choice;
+    int choice, cpu_choice;
 
-
-    // Create Pokemon for user and cpu
+    // Create Pokemon for user and CPU
     pokemon* player_pokemon;
     pokemon* cpu_pokemon;
 
@@ -276,11 +280,14 @@ int main()
     // Greeting and get user's name
     get_user_input(&global_cpu_name);
 
-    // Pokemon selection
+    // Pokemon selection - search in the pokedex to confirm it exists
     choice = pokemon_selection();
     player_pokemon = set_pokemon(choice, available_pokemon);
+    
+    search_pokemon(pokedex, player_pokemon->name);
+    
     system("clear");
-
+    
     // Print user's Pokemon information
     print_stats(player_pokemon, "You picked the following Pokemon: ");
 
@@ -288,7 +295,7 @@ int main()
     cpu_choice = (rand() % 4) + 1;
     cpu_pokemon = set_pokemon(cpu_choice, available_pokemon);
 
-    // Print CPU stats. TODO create print_cpu_stats()
+    // Print CPU stats.
     printf("\n%s picked %s!\n", global_cpu_name, cpu_pokemon->name);
     printf("HP: %d\nType: %s\nLevel: %i\n\n", cpu_pokemon->max_hp, cpu_pokemon->type, cpu_pokemon->level);
 
@@ -296,11 +303,10 @@ int main()
 
     // Battle Loop
 
-    // Declare variables needed for battle loop
+    // variables needed for battle loop
     int player_battle_choice, cpu_move_choice, fight_choice, damage, cpu_damage;
 
     // The condition that keeps the loop going is that both player's HP must be > 0. If it is <= 0 it means one of them has lost the battle and loop should end.
-    // Chose to leave the general structure here instead of inside of a function since this is the main objective of the game. Helper functions used throughout.
     while (player_pokemon->current_hp > 0 && cpu_pokemon->current_hp > 0)
     {
         // Display battle options to the user
