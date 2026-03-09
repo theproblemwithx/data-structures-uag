@@ -201,6 +201,12 @@ int main()
     printf("\n");
     sleep(3);
 
+    // Set up Queue
+    Queue battle_log;
+    battle_log.front = NULL;
+    battle_log.back = NULL;
+    battle_log.size = 0;
+
     //set up game
 
     // List of possible opponents
@@ -237,13 +243,15 @@ int main()
     // Print CPU stats.
     printf("\n%s picked %s!\n", global_cpu_name, cpu_pokemon->name);
     printf("HP: %d\nType: %s\nLevel: %i\n\n", cpu_pokemon->max_hp, cpu_pokemon->type, cpu_pokemon->level);
-
     printf("Get ready to battle!\n\n");
-
+    
+    // ===========
     // Battle Loop
+    // ===========
 
     // variables needed for battle loop
     int player_battle_choice, cpu_move_choice, fight_choice, damage, cpu_damage;
+    char log_message[200];
 
     // The condition that keeps the loop going is that both player's HP must be > 0. If it is <= 0 it means one of them has lost the battle and loop should end.
     while (player_pokemon->current_hp > 0 && cpu_pokemon->current_hp > 0)
@@ -260,6 +268,10 @@ int main()
 
             // Attack enemy and reduce hp
             printf("%s used %s!\n", player_pokemon->name, player_pokemon->moves[fight_choice].move);
+
+            // Log player's move to the queue
+            sprintf(log_message, "%s used %s!", player_pokemon->name, player_pokemon->moves[fight_choice].move);
+            enqueue(&battle_log, log_message);
 
             // Check if move is effective against opponent and increase damage
             damage = player_pokemon->moves[fight_choice].power;
@@ -307,13 +319,17 @@ int main()
         // Check if CPU's HP below 0
         if (cpu_pokemon->current_hp <= 0)
         {
-            printf("You won this battle!\n");
+            printf("\nYou won this battle!\n");
             break;
         }
 
         // CPU turn. They will only battle. Pick a random move, reduce energy.
         cpu_move_choice = (rand() % 4);
         printf("\n%s's %s used %s!\n", global_cpu_name, cpu_pokemon->name, cpu_pokemon->moves[cpu_move_choice].move);
+
+        // Log the CPU's move to the queue
+        sprintf(log_message, "%s's %s used %s!", global_cpu_name, cpu_pokemon->name, cpu_pokemon->moves[cpu_move_choice].move);
+        enqueue(&battle_log, log_message);
 
         cpu_damage = cpu_pokemon->moves[cpu_move_choice].power;
 
@@ -341,7 +357,9 @@ int main()
 
     } // while loop ends
 
-    printf("Thanks for playing! Have a great day!\n");
+    print_battle_log(&battle_log);
+
+    printf("\nThanks for playing! Have a great day!\n");
     return 0;
 }
 
